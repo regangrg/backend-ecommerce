@@ -1,17 +1,38 @@
-import express from "express"
-import dotenv from "dotenv"
-import router from "./router/index.js"
-dotenv.config()
-const port =process.env.PORT 
-const app=express()
+import express from "express";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import router from "./router/index.js";
 
-app.get("/",(req,res)=>{
-    res.send("hello world")
-})
+dotenv.config();
 
+const app = express();
 
-app.use("/api/v1",router)
+// Middleware
+app.use(express.json());
 
-app.listen(port,()=>{
-    console.log(`server is running in port ${port}`)
-})  
+// Environment variables
+const port = process.env.PORT || 5000;
+const dataBaseUrl = process.env.DATABASE_URL;
+
+// Routes
+app.get("/", (req, res) => {
+  res.send("Hello World");
+});
+
+app.use("/api/v1", router);
+
+// Database connection
+mongoose
+  .connect(dataBaseUrl)
+  .then(() => {
+    console.log("Connected to database");
+
+    // Start server only after DB connection
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  })
+  .catch((error) => {
+    console.log("Database connection failed");
+    console.log(error.message);
+  });
